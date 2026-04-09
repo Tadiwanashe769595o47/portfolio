@@ -21,9 +21,9 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
 
 function ShineBorder({
   borderRadius = 32,
-  borderWidth = 1.5,
-  duration = 8,
-  color = ["#4285F4", "#DB4437", "#F4B400", "#0F9D58"],
+  borderWidth = 2,
+  duration = 4,
+  color = ["#4285F4", "#9b51e0", "#e91e63", "#f4b400", "#0f9d58", "#4285F4"],
   className,
   children,
 }: {
@@ -43,22 +43,25 @@ function ShineBorder({
         "--border-width": `${borderWidth}px`,
       } as React.CSSProperties}
       className={cn(
-        "relative h-full w-full rounded-[--border-radius] p-[--border-width] overflow-hidden bg-white/5",
+        "relative h-full w-full rounded-[--border-radius] overflow-hidden p-[--border-width] bg-white/5",
         className,
       )}
     >
-      <div
-        style={{
-          "--duration": `${duration}s`,
-          background: `conic-gradient(from 0deg, transparent 0%, ${colors}, transparent 60%)`,
-        } as React.CSSProperties}
-        className={cn(
-          "absolute inset-[-150%] z-0 pointer-events-none",
-          "animate-[rotate_var(--duration)_linear_infinite]",
-          "opacity-70 blur-[2px]"
-        )}
-      ></div>
+      {/* Animated Border Layer */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
+        <div
+          style={{
+            "--duration": `${duration}s`,
+            background: `conic-gradient(from 0deg, ${colors})`,
+          } as React.CSSProperties}
+          className={cn(
+            "w-[300%] aspect-square animate-[rotate_var(--duration)_linear_infinite]",
+            "opacity-100 blur-[1px]"
+          )}
+        ></div>
+      </div>
       
+      {/* Inner Content Layer */}
       <div 
         className="relative z-10 w-full h-full bg-[#050505] rounded-[calc(var(--border-radius)-var(--border-width))] overflow-hidden"
       >
@@ -78,8 +81,8 @@ const Card = ({ children, className = "" }: { children: React.ReactNode, classNa
       <ShineBorder 
         borderRadius={32} 
         color={["#4285F4", "#9b51e0", "#e91e63", "#f4b400", "#0f9d58", "#4285F4"]} 
-        duration={8} 
-        borderWidth={1.5}
+        duration={4} 
+        borderWidth={2}
       >
         <div className="p-8 relative z-10 h-full">
           {children}
