@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
-import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake, Send, Bot, Loader2 } from 'lucide-react';
-import { GoogleGenAI } from '@google/genai';
+import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake } from 'lucide-react';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -39,143 +38,29 @@ const SectionHeading = ({ title, icon: Icon }: { title: string, icon: any }) => 
   </div>
 );
 
-const PortfolioChatbot = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'model', content: string }[]>([
-    { role: 'model', content: "Hi! I'm an AI assistant trained on Tadiwanashe's portfolio. Ask me anything about her skills, experience, or projects!" }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  const handleSend = async () => {
-    if (!input.trim()) return;
-
-    const userMsg = input.trim();
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
-    setIsLoading(true);
-
-    try {
-      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
-      
-      const systemInstruction = `You are an AI assistant representing Tadiwanashe Brenda Chitsva. 
-You answer questions about her skills, experience, and projects based on her portfolio.
-Be professional, concise, and helpful.
-
-Here is her information:
-- Name: Tadiwanashe Brenda Chitsva
-- Roles: Information and Communication Engineer, Electronic Engineer, Full-stack web developer, AI systems engineer.
-- Location: Nanjing, China & Zimbabwe. Open to Global Roles.
-- Education: 
-  - MSc in Information & Communication Engineering (NUIST, China)
-  - B.Tech in Electronic Engineering (First Class, HIT, Zimbabwe)
-- Experience:
-  - IT Support Intern & Customer Service Agent at Zimswitch Technologies (Jan 2022 - Jan 2023). Improved processing efficiency by 3% via AI/ML deployments.
-  - English Teacher (Free Fluency Academy, Brave Hearts International, Methodist Community Church).
-- Projects:
-  - Anyiculture: Full-stack agricultural e-commerce platform (React, Node.js, MongoDB, Tailwind, Stripe).
-  - Lycore: AI-powered medical diagnosis platform (React, Python, TensorFlow, FastAPI, PostgreSQL).
-  - IGCSE Study App: Educational platform (React Native, Firebase, Node.js).
-  - Lotanash: Self-Service Fuel Purchase System (Embedded C, C++, IoT, React).
-- Skills:
-  - Languages: Python, JavaScript/TypeScript, C/C++, SQL, HTML/CSS.
-  - Frameworks: React, Node.js, Express, Tailwind CSS, FastAPI.
-  - AI/ML: TensorFlow, PyTorch, LLMs, Computer Vision, NLP.
-  - Hardware: Microcontrollers (Arduino, ESP32, STM32), PCB Design, IoT.
-  - Tools: Git, Docker, Linux, AWS, Firebase.
-- Contact: WhatsApp (+263 779 406 846), LinkedIn (tadiwanashe-brenda-chitsva), Email (chitsvatadiwanashe@gmail.com).
-
-Do not invent information. If asked something outside this scope, politely say you don't have that information but they can contact her directly.`;
-
-      const history = messages.slice(1).map(m => ({
-        role: m.role,
-        parts: [{ text: m.content }]
-      }));
-
-      const response = await ai.models.generateContent({
-        model: 'gemini-2.5-flash',
-        contents: [
-          ...history,
-          { role: 'user', parts: [{ text: userMsg }] }
-        ],
-        config: {
-          systemInstruction: systemInstruction,
-        }
-      });
-
-      setMessages(prev => [...prev, { role: 'model', content: response.text || "I'm sorry, I couldn't generate a response." }]);
-    } catch (error) {
-      console.error("Chatbot error:", error);
-      setMessages(prev => [...prev, { role: 'model', content: "Sorry, I encountered an error. Please try again later or contact Tadiwanashe directly." }]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+const SafeImage = ({ src, alt, className, fallbackText, ...props }: any) => {
+  const [error, setError] = useState(false);
+  
+  if (error || !src) {
+    return (
+      <div className={`${className} flex items-center justify-center bg-surface border border-border text-muted text-[10px] font-bold uppercase p-1 text-center overflow-hidden`}>
+        {fallbackText || alt?.split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2) || '??'}
+      </div>
+    );
+  }
 
   return (
-    <Card className="flex flex-col h-[500px] w-full mt-12 bg-surface/50 border-border">
-      <div className="p-4 border-b border-border flex items-center gap-3 bg-surface/30">
-        <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
-          <Bot size={24} />
-        </div>
-        <div>
-          <h3 className="font-bold font-display">Tadiwanashe's AI Assistant</h3>
-          <p className="text-xs text-muted">Ask me about her skills & experience</p>
-        </div>
-      </div>
-      
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
-        {isLoading && (
-          <div className="sticky top-0 left-0 right-0 z-10 flex justify-center mb-4">
-            <div className="bg-surface/90 backdrop-blur-md border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
-              <Loader2 size={16} className="animate-spin text-accent" />
-              <span className="text-sm font-medium text-foreground">AI is thinking...</span>
-            </div>
-          </div>
-        )}
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[80%] rounded-2xl p-3 ${msg.role === 'user' ? 'bg-white text-black rounded-tr-sm' : 'bg-surface border border-border text-foreground rounded-tl-sm'}`}>
-              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
-            </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
-      
-      <div className="p-4 border-t border-border bg-surface/30">
-        <form 
-          onSubmit={(e) => { e.preventDefault(); handleSend(); }}
-          className="flex gap-2"
-        >
-          <input
-            type="text"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about my React experience..."
-            className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:border-accent transition-colors"
-            disabled={isLoading}
-          />
-          <button 
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-          >
-            <Send size={18} className="ml-1" />
-          </button>
-        </form>
-      </div>
-    </Card>
+    <img
+      src={src}
+      alt={alt}
+      className={className}
+      referrerPolicy="no-referrer"
+      onError={() => setError(true)}
+      {...props}
+    />
   );
 };
+
 
 export default function App() {
   const { scrollY } = useScroll();
@@ -315,7 +200,7 @@ export default function App() {
               <div className="mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-border shrink-0 shadow-xl">
-                    <img src="/profile.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Tadiwanashe+Chitsva&background=0D8ABC&color=fff'; }} />
+                    <SafeImage src="/profile.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -428,28 +313,28 @@ export default function App() {
                 <h3 className="text-3xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><Award className="text-accent"/> Awards & Honors</h3>
                 <ul className="space-y-6">
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><img src="https://logo.clearbit.com/hit.ac.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=HIT&background=0D8ABC&color=fff'; }} alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">Emerson Dambudzo Mnangagwa Chancellor's Award</h4>
                       <p className="text-sm text-muted">Overall Best Graduating Female Student ($1000 prize). Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><img src="https://logo.clearbit.com/hit.ac.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=HIT&background=0D8ABC&color=fff'; }} alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">Vice Chancellor's Award</h4>
                       <p className="text-sm text-muted">Best Graduating Female Student in Electronics Engineering. Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><img src="https://logo.clearbit.com/nuist.edu.cn" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=NUIST&background=0D8ABC&color=fff'; }} alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">NUIST Excellent Freshman Scholarship</h4>
                       <p className="text-sm text-muted">1st Class Scholarship based on merit. Awarded by Nanjing University of Information Science and Technology (NUIST) (2023–2025).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><img src="https://ui-avatars.com/api/?name=ZIM&background=0D8ABC&color=fff" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://ui-avatars.com/api/?name=ZIM&background=0D8ABC&color=fff" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">STEM Scholarship Zimbabwe</h4>
                       <p className="text-sm text-muted">Recognizing STEM academic promise. Awarded by the Government of Zimbabwe (2016-2018).</p>
@@ -469,7 +354,7 @@ export default function App() {
                       <a href="https://verify.skilljar.com/c/ri4ci9sngnzk" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
                     </div>
                     <p className="text-sm text-muted mb-4">Anthropic Education</p>
-                    <img src="/anthropic-certificate.jpg" alt="Anthropic Certificate" className="w-full rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+anthropic-certificate.jpg+to+public+folder'; }} />
+                    <SafeImage src="/anthropic-certificate.jpg" alt="Anthropic Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <div className="flex justify-between items-start gap-2 mb-1">
@@ -477,17 +362,17 @@ export default function App() {
                       <a href="https://www.credly.com/badges/46732ac5-922a-4d6f-8150-4d7f27ef4f16/print" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
                     </div>
                     <p className="text-sm text-muted mb-4">IBM SkillsBuild (Quantum Enigmas) & Udemy (Quantum NLP)</p>
-                    <img src="/quantum-nlp-certificate.jpg" alt="Quantum Computing Certificate" className="w-full rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+quantum-nlp-certificate.jpg+to+public+folder'; }} />
+                    <SafeImage src="/quantum-nlp-certificate.jpg" alt="Quantum Computing Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <h4 className="font-bold text-lg text-foreground mb-1">PTE Academic English Assessment</h4>
                     <p className="text-sm text-muted mb-4">Score: 90 (Elite academic English proficiency)</p>
-                    <img src="/ppte-score-report.jpg" alt="PTE Score Report" className="w-full rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+ppte-score-report.jpg+to+public+folder'; }} />
+                    <SafeImage src="/ppte-score-report.jpg" alt="PTE Score Report" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <h4 className="font-bold text-lg text-foreground mb-1">150-Hour TEFL/TESOL Certificate</h4>
                     <p className="text-sm text-muted mb-4">TEFL Universal</p>
-                    <img src="/tefl-certificate.jpg" alt="TEFL Certificate" className="w-full rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+tefl-certificate.jpg+to+public+folder'; }} />
+                    <SafeImage src="/tefl-certificate.jpg" alt="TEFL Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                 </ul>
               </Card>
@@ -505,7 +390,7 @@ export default function App() {
               <Card>
                 <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2">
                   <div className="flex items-center gap-4">
-                    <img src="https://ui-avatars.com/api/?name=Unito+Video&background=0D8ABC&color=fff" alt="Unito Video Logo" className="w-12 h-12 rounded-lg bg-white" />
+                    <SafeImage src="https://ui-avatars.com/api/?name=Unito+Video&background=0D8ABC&color=fff" alt="Unito Video Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
                       <h3 className="text-3xl font-bold tracking-tight font-display">Information Technologist</h3>
                       <p className="text-accent text-lg">Unito Video (Anyiculture) · Wuhan, China</p>
@@ -525,7 +410,7 @@ export default function App() {
               <FadeIn delay={0.2}>
                 <Card className="h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src="https://logo.clearbit.com/zimswitch.co.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Zimswitch&background=0D8ABC&color=fff'; }} alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
+                    <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
                       <h3 className="text-2xl font-bold tracking-tight font-display">IT Support Intern</h3>
                       <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
@@ -542,7 +427,7 @@ export default function App() {
               <FadeIn delay={0.3}>
                 <Card className="h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <img src="https://logo.clearbit.com/zimswitch.co.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Zimswitch&background=0D8ABC&color=fff'; }} alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
+                    <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
                       <h3 className="text-2xl font-bold tracking-tight font-display">Customer Service Agent</h3>
                       <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
@@ -569,7 +454,7 @@ export default function App() {
             <FadeIn delay={0.1}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <img src="/anyiculture-screenshot.jpg" alt="Anyiculture" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/111/333?text=Upload+anyiculture-screenshot.jpg+to+public+folder'; }} />
+                  <SafeImage src="/anyiculture-screenshot.jpg" alt="Anyiculture" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -591,7 +476,7 @@ export default function App() {
             <FadeIn delay={0.2}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <img src="/lycore-screenshot.jpg" alt="Lycore" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/111/333?text=Upload+lycore-screenshot.jpg+to+public+folder'; }} />
+                  <SafeImage src="/lycore-screenshot.jpg" alt="Lycore" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -613,7 +498,7 @@ export default function App() {
             <FadeIn delay={0.3}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <img src="/igcse-screenshot.jpg" alt="IGCSE Study App" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/111/333?text=Upload+igcse-screenshot.jpg+to+public+folder'; }} />
+                  <SafeImage src="/igcse-screenshot.jpg" alt="IGCSE Study App" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -635,7 +520,7 @@ export default function App() {
             <FadeIn delay={0.4}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <img src="/lotanash-screenshot.jpg" alt="Self-Service Fuel Purchase System" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" onError={(e) => { e.currentTarget.src = 'https://placehold.co/600x400/111/333?text=Upload+lotanash-screenshot.jpg+to+public+folder'; }} />
+                  <SafeImage src="/lotanash-screenshot.jpg" alt="Self-Service Fuel Purchase System" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Embedded System</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -708,14 +593,14 @@ export default function App() {
                         <span className="text-xs font-mono text-accent">Aug 2025</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <img src="https://logo.clearbit.com/nuist.edu.cn" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=NUIST&background=0D8ABC&color=fff'; }} alt="NUIST Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Information and Communication Engineering</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Nanjing University of Information Science and Technology (NUIST). GPA: 3.93/5.0. Specialization in Nanophotonic Biosensors.</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Digital Image Processing, Big Data Analyzing and Processing, Communication & Information Processing, Stochastic Processes, Matrix Theory.</p>
                       <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                        <img src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+msc-certificate1.jpg+to+public+folder'; }} />
-                        <img src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+msc-certificate2.jpg+to+public+folder'; }} />
+                        <SafeImage src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
+                        <SafeImage src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
                       </div>
                     </div>
                   </div>
@@ -730,13 +615,13 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Oct 2023</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <img src="https://logo.clearbit.com/hit.ac.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=HIT&background=0D8ABC&color=fff'; }} alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Electronic Engineering (1st Class Honours)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Harare Institute of Technology. Degree Class 1 (First Class).</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Microcontrollers, DSP, Embedded Systems, Fundamentals of Photonics, Robotics Technology, RF Microwave Devices, Control Engineering.</p>
                       <p className="text-xs text-accent mb-3"><strong>Awards:</strong> Chancellor's Award for Best Graduating Female Student, Vice Chancellor's Prize for Best Graduating Student in Electronic Engineering.</p>
-                      <img src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+btech-certificate.jpg+to+public+folder'; }} />
+                      <SafeImage src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -750,12 +635,12 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Oct 2023</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <img src="https://logo.clearbit.com/hit.ac.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=HIT&background=0D8ABC&color=fff'; }} alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Harare Institute of Technology (Merit)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Formal academic certification completing tertiary foundation requirements, demonstrating pedagogical and foundational academic competence.</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Applied Educational Technology, Research and Development Methodologies, Curriculum Issues in Higher and Tertiary Education.</p>
-                      <img src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+tertiary-ed-certificate.jpg+to+public+folder'; }} />
+                      <SafeImage src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -769,11 +654,11 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Nov 2018</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <img src="https://logo.clearbit.com/zimsec.co.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=ZIMSEC&background=0D8ABC&color=fff'; }} alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Physics (A), Chemistry (B), Pure Mathematics (B)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">ZRP High School.</p>
-                      <img src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+a-level-certificate.jpg+to+public+folder'; }} />
+                      <SafeImage src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -787,11 +672,11 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Nov 2016</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <img src="https://logo.clearbit.com/zimsec.co.zw" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=ZIMSEC&background=0D8ABC&color=fff'; }} alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">10 A's and 3 B's</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Including Mathematics (A), Physics (A), Chemistry (A), Biology (B), Computer Studies (B).</p>
-                      <img src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" onError={(e) => { e.currentTarget.src = 'https://placehold.co/800x600/111/333?text=Upload+o-level-certificate.jpg+to+public+folder'; }} />
+                      <SafeImage src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -810,7 +695,7 @@ export default function App() {
             <FadeIn delay={0.1}>
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
-                  <img src="https://ui-avatars.com/api/?name=Free+Fluency+Academy&background=0D8ABC&color=fff" alt="Free Fluency Academy Logo" className="w-12 h-12 rounded-lg bg-white" />
+                  <SafeImage src="https://ui-avatars.com/api/?name=Free+Fluency+Academy&background=0D8ABC&color=fff" alt="Free Fluency Academy Logo" className="w-12 h-12 rounded-lg bg-white" />
                   <div>
                     <h4 className="font-bold text-2xl mb-1 font-display">Online English Tutor</h4>
                     <p className="text-accent text-sm font-medium">Free Fluency Academy · Ohio, USA</p>
@@ -828,7 +713,7 @@ export default function App() {
             <FadeIn delay={0.2}>
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
-                  <img src="https://ui-avatars.com/api/?name=Brave+Hearts+International&background=0D8ABC&color=fff" alt="Brave Hearts International Logo" className="w-12 h-12 rounded-lg bg-white" />
+                  <SafeImage src="https://ui-avatars.com/api/?name=Brave+Hearts+International&background=0D8ABC&color=fff" alt="Brave Hearts International Logo" className="w-12 h-12 rounded-lg bg-white" />
                   <div>
                     <h4 className="font-bold text-2xl mb-1 font-display">Education Advisor</h4>
                     <p className="text-accent text-sm font-medium">Brave Hearts International · Japan</p>
@@ -846,7 +731,7 @@ export default function App() {
             <FadeIn delay={0.3}>
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
-                  <img src="https://ui-avatars.com/api/?name=Methodist+Community+Church&background=0D8ABC&color=fff" alt="Methodist Community Church Logo" className="w-12 h-12 rounded-lg bg-white" />
+                  <SafeImage src="https://ui-avatars.com/api/?name=Methodist+Community+Church&background=0D8ABC&color=fff" alt="Methodist Community Church Logo" className="w-12 h-12 rounded-lg bg-white" />
                   <div>
                     <h4 className="font-bold text-2xl mb-1 font-display">Communications Committee</h4>
                     <p className="text-accent text-sm font-medium">Methodist Community Church · Zimbabwe</p>
@@ -873,7 +758,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <img src="https://logo.clearbit.com/nspe.org" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=NSPE&background=0D8ABC&color=fff'; }} alt="NSPE Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://logo.clearbit.com/nspe.org" alt="NSPE Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">National Society of Professional Engineers (NSPE)</h4>
@@ -888,7 +773,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <img src="https://logo.clearbit.com/ieee.org" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=IEEE&background=0D8ABC&color=fff'; }} alt="IEEE Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://logo.clearbit.com/ieee.org" alt="IEEE Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">Institute of Electrical and Electronics Engineers (IEEE)</h4>
@@ -904,7 +789,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <img src="https://logo.clearbit.com/ewb.org.za" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=EWBSA&background=0D8ABC&color=fff'; }} alt="EWBSA Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://logo.clearbit.com/ewb.org.za" alt="EWBSA Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">Engineers Without Borders South Africa (EWBSA)</h4>
@@ -920,29 +805,25 @@ export default function App() {
         {/* Socials & Contact */}
         <section id="contact">
           <FadeIn delay={0.1}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-              <Card className="flex flex-col items-start justify-between gap-8 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.05),_transparent_50%)] h-full">
+            <div className="max-w-3xl mx-auto">
+              <Card className="flex flex-col items-center text-center gap-8 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.05),_transparent_50%)]">
                 <div>
                   <h2 className="text-4xl font-bold tracking-tight mb-4 font-display">Let's build together.</h2>
-                  <p className="text-muted max-w-md mb-8">Currently open for new opportunities in Agentic AI, Web Development, Embedded Systems, and Research.</p>
+                  <p className="text-muted max-w-md mx-auto mb-8">Currently open for new opportunities in Agentic AI, Web Development, Embedded Systems, and Research.</p>
                   
-                  <div className="flex items-center gap-3">
-                    <a href="https://wa.me/263779406846" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="WhatsApp: +263 779 406 846">
-                      <MessageCircle size={20} />
+                  <div className="flex items-center justify-center gap-4">
+                    <a href="https://wa.me/263779406846" target="_blank" rel="noreferrer" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="WhatsApp: +263 779 406 846">
+                      <MessageCircle size={24} />
                     </a>
-                    <a href="https://linkedin.com/in/tadiwanashe-brenda-chitsva" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="LinkedIn">
-                      <Linkedin size={20} />
+                    <a href="https://linkedin.com/in/tadiwanashe-brenda-chitsva" target="_blank" rel="noreferrer" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="LinkedIn">
+                      <Linkedin size={24} />
                     </a>
-                    <a href="mailto:chitsvatadiwanashe@gmail.com" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Email: chitsvatadiwanashe@gmail.com">
-                      <Mail size={20} />
+                    <a href="mailto:chitsvatadiwanashe@gmail.com" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="Email: chitsvatadiwanashe@gmail.com">
+                      <Mail size={24} />
                     </a>
                   </div>
                 </div>
               </Card>
-              
-              <div className="h-full">
-                <PortfolioChatbot />
-              </div>
             </div>
           </FadeIn>
         </section>
