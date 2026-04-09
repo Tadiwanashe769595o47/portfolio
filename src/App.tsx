@@ -19,78 +19,34 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
   </motion.div>
 );
 
-function ShineBorder({
-  borderRadius = 32,
-  borderWidth = 2,
-  duration = 4,
-  color = ["#4285F4", "#9b51e0", "#e91e63", "#f4b400", "#0f9d58", "#4285F4"],
-  className,
-  children,
-}: {
-  borderRadius?: number;
-  borderWidth?: number;
-  duration?: number;
-  color?: string | string[];
-  className?: string;
-  children: React.ReactNode;
-}) {
-  const colors = Array.isArray(color) ? color.join(", ") : color;
-  
-  return (
-    <div
-      style={{
-        "--border-radius": `${borderRadius}px`,
-        "--border-width": `${borderWidth}px`,
-      } as React.CSSProperties}
-      className={cn(
-        "relative h-full w-full rounded-[--border-radius] overflow-hidden p-[--border-width] bg-white/5",
-        className,
-      )}
-    >
-      {/* Animated Border Layer */}
-      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none">
-        <div
-          style={{
-            "--duration": `${duration}s`,
-            background: `conic-gradient(from 0deg, ${colors})`,
-          } as React.CSSProperties}
-          className={cn(
-            "w-[300%] aspect-square animate-[rotate_var(--duration)_linear_infinite]",
-            "opacity-100 blur-[1px]"
-          )}
-        ></div>
-      </div>
-      
-      {/* Inner Content Layer */}
-      <div 
-        className="relative z-10 w-full h-full bg-[#050505] rounded-[calc(var(--border-radius)-var(--border-width))] overflow-hidden"
-      >
-        {children}
-      </div>
-    </div>
-  );
-}
-
-const Card = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
+function Card({ children, className = "" }: { children: React.ReactNode, className?: string }) {
   return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className={cn("h-full", className)}
+      className={cn(
+        "relative h-full w-full rounded-[32px] overflow-hidden bg-[#050505] border border-white/10 group",
+        className
+      )}
     >
-      <ShineBorder 
-        borderRadius={32} 
-        color={["#4285F4", "#9b51e0", "#e91e63", "#f4b400", "#0f9d58", "#4285F4"]} 
-        duration={4} 
-        borderWidth={2}
-      >
-        <div className="p-8 relative z-10 h-full">
-          {children}
-        </div>
-      </ShineBorder>
+      {/* Animated Glow Effect */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <div className="absolute top-0 left-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-blue-500 to-transparent shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+        <div className="absolute bottom-0 right-1/4 w-1/2 h-px bg-gradient-to-r from-transparent via-green-500 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+        <div className="absolute top-1/4 left-0 w-px h-1/2 bg-gradient-to-b from-transparent via-blue-500 to-transparent shadow-[0_0_15px_rgba(59,130,246,0.5)]" />
+        <div className="absolute bottom-1/4 right-0 w-px h-1/2 bg-gradient-to-b from-transparent via-green-500 to-transparent shadow-[0_0_15px_rgba(16,185,129,0.5)]" />
+      </div>
+
+      {/* Subtle Corner Accents */}
+      <div className="absolute top-0 left-0 w-12 h-12 border-t-2 border-l-2 border-blue-500/30 rounded-tl-[32px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-12 h-12 border-b-2 border-r-2 border-green-500/30 rounded-br-[32px] pointer-events-none" />
+
+      <div className="p-8 relative z-10 h-full">
+        {children}
+      </div>
     </motion.div>
   );
-};
+}
 
 const SectionHeading = ({ title, icon: Icon }: { title: string, icon: any }) => (
   <div className="flex items-center gap-3 mb-10">
@@ -398,7 +354,7 @@ export default function App() {
                   <Terminal className="text-muted shrink-0" />
                   <div>
                     <p className="font-medium text-sm">Autonomous AI Agents</p>
-                    <p className="text-xs text-muted">Manus, Antigravity, Cursor, Claude, Gemini, OpenClaw, Docker, n8n</p>
+                    <p className="text-xs text-muted">Manus, Cursor, Claude, Gemini, OpenClaw, Docker, n8n</p>
                   </div>
                 </div>
                 <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
@@ -568,17 +524,32 @@ export default function App() {
               <Card className="h-full">
                 <h3 className="text-2xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><FileBadge className="text-accent"/> Certifications</h3>
                 <ul className="space-y-4">
-                  <li className="p-4 bg-background/50 border border-border rounded-xl">
-                    <h4 className="font-bold text-sm mb-1">AI Fluency: Frameworks</h4>
-                    <p className="text-xs text-muted">Anthropic Education</p>
+                  <li className="p-4 bg-background/50 border border-border rounded-xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-surface border border-border shrink-0 overflow-hidden">
+                      <SafeImage src="/cert-ai.jpg" alt="AI Cert" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm mb-1">AI Fluency: Frameworks</h4>
+                      <p className="text-xs text-muted">Anthropic Education</p>
+                    </div>
                   </li>
-                  <li className="p-4 bg-background/50 border border-border rounded-xl">
-                    <h4 className="font-bold text-sm mb-1">Quantum Computing</h4>
-                    <p className="text-xs text-muted">IBM SkillsBuild & Udemy</p>
+                  <li className="p-4 bg-background/50 border border-border rounded-xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-surface border border-border shrink-0 overflow-hidden">
+                      <SafeImage src="/cert-quantum.jpg" alt="Quantum Cert" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm mb-1">Quantum Computing</h4>
+                      <p className="text-xs text-muted">IBM SkillsBuild & Udemy</p>
+                    </div>
                   </li>
-                  <li className="p-4 bg-background/50 border border-border rounded-xl">
-                    <h4 className="font-bold text-sm mb-1">PTE Academic: 90/90</h4>
-                    <p className="text-xs text-muted">Elite English Proficiency</p>
+                  <li className="p-4 bg-background/50 border border-border rounded-xl flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-lg bg-surface border border-border shrink-0 overflow-hidden">
+                      <SafeImage src="/cert-pte.jpg" alt="PTE Cert" className="w-full h-full object-cover" />
+                    </div>
+                    <div>
+                      <h4 className="font-bold text-sm mb-1">PTE Academic: 90/90</h4>
+                      <p className="text-xs text-muted">Elite English Proficiency</p>
+                    </div>
                   </li>
                 </ul>
                 <div className="mt-6 pt-6 border-t border-border">
@@ -649,48 +620,31 @@ export default function App() {
                 </div>
                 <ul className="space-y-4 text-muted mt-4">
                   <li><strong className="text-foreground">Objective:</strong> Manage website development, network systems, and streamline operations.</li>
-                  <li><strong className="text-foreground">Action:</strong> Developed agentic workflows using OpenClaw, Cursor, Claude, and Antigravity, while ensuring high availability for critical operations.</li>
+                  <li><strong className="text-foreground">Action:</strong> Developed agentic workflows using OpenClaw, Cursor, and Claude, while ensuring high availability for critical operations.</li>
                   <li><strong className="text-foreground">Result:</strong> Successfully automated complex business processes, reducing manual overhead and ensuring high availability for critical operations.</li>
                 </ul>
               </Card>
             </FadeIn>
 
-            <div className="grid md:grid-cols-2 gap-6">
-              <FadeIn delay={0.2}>
-                <Card className="h-full">
-                  <div className="flex items-center gap-4 mb-4">
+            <FadeIn delay={0.2}>
+              <Card>
+                <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-2">
+                  <div className="flex items-center gap-4">
                     <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
-                      <h3 className="text-2xl font-bold tracking-tight font-display">IT Support Intern</h3>
-                      <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
-                      <span className="text-xs text-muted font-mono mt-1 block">Jan 2022 - Jan 2023</span>
+                      <h3 className="text-3xl font-bold tracking-tight font-display">IT Support & Customer Service Intern</h3>
+                      <p className="text-accent text-lg">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
                     </div>
                   </div>
-                  <ul className="space-y-4 text-sm text-muted mt-4">
-                    <li><strong className="text-foreground">Objective:</strong> Ensure high availability and seamless operation of the national payment switching infrastructure, supporting over 500,000 daily active users.</li>
-                    <li><strong className="text-foreground">Action:</strong> Streamlined complex banking partner integrations, leveraged advanced PostgreSQL analytics for data-driven insights, and executed critical firmware and security updates.</li>
-                    <li><strong className="text-foreground">Result:</strong> Successfully deployed AI/ML models to optimize data pipelines, yielding a 3% improvement in processing efficiency while maintaining a secure environment with zero critical vulnerabilities.</li>
-                  </ul>
-                </Card>
-              </FadeIn>
-              <FadeIn delay={0.3}>
-                <Card className="h-full">
-                  <div className="flex items-center gap-4 mb-4">
-                    <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
-                    <div>
-                      <h3 className="text-2xl font-bold tracking-tight font-display">Customer Service Agent</h3>
-                      <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
-                      <span className="text-xs text-muted font-mono mt-1 block">Jan 2022 - Jan 2023</span>
-                    </div>
-                  </div>
-                  <ul className="space-y-4 text-sm text-muted mt-4">
-                    <li><strong className="text-foreground">Objective:</strong> Improve customer support resolution times and maintain high data quality.</li>
-                    <li><strong className="text-foreground">Action:</strong> Facilitated data quality operations on customer databases and monitored system performance using BI tools.</li>
-                    <li><strong className="text-foreground">Result:</strong> Achieved a 3-5% increase in issue resolution efficiency through analytical precision and proactive support.</li>
-                  </ul>
-                </Card>
-              </FadeIn>
-            </div>
+                  <span className="text-sm text-muted font-mono bg-white/5 px-3 py-1 rounded-full w-fit">Jan 2022 - Jan 2023</span>
+                </div>
+                <ul className="space-y-4 text-muted mt-4">
+                  <li><strong className="text-foreground">Objective:</strong> Ensure high availability of national payment infrastructure and improve customer resolution times.</li>
+                  <li><strong className="text-foreground">Action:</strong> Streamlined banking partner integrations, executed security updates, and monitored system performance using BI tools.</li>
+                  <li><strong className="text-foreground">Result:</strong> Yielded a 3% improvement in processing efficiency and a 5% increase in issue resolution efficiency.</li>
+                </ul>
+              </Card>
+            </FadeIn>
           </div>
         </section>
 
