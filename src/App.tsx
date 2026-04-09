@@ -1,6 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
-import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake } from 'lucide-react';
+import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake, Phone } from 'lucide-react';
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
+import type { Engine } from "@tsparticles/engine";
+
+import { cn } from './lib/utils';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -14,17 +19,72 @@ const FadeIn = ({ children, delay = 0, className = "" }: { children: React.React
   </motion.div>
 );
 
+function ShineBorder({
+  borderRadius = 32,
+  borderWidth = 1.5,
+  duration = 8,
+  color = ["#4285F4", "#DB4437", "#F4B400", "#0F9D58"],
+  className,
+  children,
+}: {
+  borderRadius?: number;
+  borderWidth?: number;
+  duration?: number;
+  color?: string | string[];
+  className?: string;
+  children: React.ReactNode;
+}) {
+  const colors = Array.isArray(color) ? color.join(", ") : color;
+  
+  return (
+    <div
+      style={{
+        "--border-radius": `${borderRadius}px`,
+        "--border-width": `${borderWidth}px`,
+      } as React.CSSProperties}
+      className={cn(
+        "relative h-full w-full rounded-[--border-radius] p-[--border-width] overflow-hidden bg-white/5",
+        className,
+      )}
+    >
+      <div
+        style={{
+          "--duration": `${duration}s`,
+          background: `conic-gradient(from 0deg, transparent 0%, ${colors}, transparent 60%)`,
+        } as React.CSSProperties}
+        className={cn(
+          "absolute inset-[-150%] z-0 pointer-events-none",
+          "animate-[rotate_var(--duration)_linear_infinite]",
+          "opacity-70 blur-[2px]"
+        )}
+      ></div>
+      
+      <div 
+        className="relative z-10 w-full h-full bg-[#050505] rounded-[calc(var(--border-radius)-var(--border-width))] overflow-hidden"
+      >
+        {children}
+      </div>
+    </div>
+  );
+}
+
 const Card = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => {
   return (
     <motion.div
       whileHover={{ y: -4 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className={`glass-card rounded-[2rem] p-8 relative overflow-hidden group ${className}`}
+      className={cn("h-full", className)}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-      <div className="relative z-10">
-        {children}
-      </div>
+      <ShineBorder 
+        borderRadius={32} 
+        color={["#4285F4", "#9b51e0", "#e91e63", "#f4b400", "#0f9d58", "#4285F4"]} 
+        duration={8} 
+        borderWidth={1.5}
+      >
+        <div className="p-8 relative z-10 h-full">
+          {children}
+        </div>
+      </ShineBorder>
     </motion.div>
   );
 };
@@ -116,8 +176,89 @@ export default function App() {
     mouseY.set(0);
   };
 
+  const [init, setInit] = useState(false);
+
+  useEffect(() => {
+    initParticlesEngine(async (engine) => {
+      await loadSlim(engine);
+    }).then(() => {
+      setInit(true);
+    });
+  }, []);
+
   return (
     <div className="min-h-screen bg-background text-foreground selection:bg-white selection:text-black pb-24 font-sans">
+      {/* Particles Background */}
+      {init && (
+        <Particles
+          id="tsparticles"
+          className="fixed inset-0 z-0 pointer-events-none"
+          options={{
+            fullScreen: { enable: false },
+            background: {
+              color: {
+                value: "transparent",
+              },
+            },
+            fpsLimit: 120,
+            interactivity: {
+              events: {
+                onHover: {
+                  enable: true,
+                  mode: "repulse",
+                },
+                resize: true,
+              },
+              modes: {
+                repulse: {
+                  distance: 100,
+                  duration: 0.4,
+                },
+              },
+            },
+            particles: {
+              color: {
+                value: "#ffffff",
+              },
+              links: {
+                color: "#ffffff",
+                distance: 150,
+                enable: true,
+                opacity: 0.1,
+                width: 1,
+              },
+              move: {
+                direction: "none",
+                enable: true,
+                outModes: {
+                  default: "bounce",
+                },
+                random: false,
+                speed: 0.5,
+                straight: false,
+              },
+              number: {
+                density: {
+                  enable: true,
+                  area: 800,
+                },
+                value: 40,
+              },
+              opacity: {
+                value: 0.2,
+              },
+              shape: {
+                type: "circle",
+              },
+              size: {
+                value: { min: 1, max: 2 },
+              },
+            },
+            detectRetina: true,
+          }}
+        />
+      )}
+
       {/* Background Parallax */}
       <motion.div style={{ y: bgY }} className="fixed inset-0 bg-grid pointer-events-none z-0 opacity-40" />
       <motion.div style={{ y: glowY }} className="fixed inset-0 glow-effect z-0" />
@@ -133,40 +274,33 @@ export default function App() {
         </a>
       </nav>
 
-      <main className="relative z-10 max-w-6xl mx-auto px-4 pt-32 md:pt-48 space-y-40">
+      <main className="relative z-10 max-w-7xl mx-auto px-4 pt-24 md:pt-32 space-y-24 md:space-y-32">
         
         {/* Hero Section */}
         <motion.section 
           style={{ opacity: heroOpacity, y: heroY, perspective: 1200 }} 
-          className="relative py-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center text-left"
+          className="relative py-20 flex flex-col items-center justify-center text-center min-h-[90vh] w-full"
           onMouseMove={handleHeroMouseMove}
           onMouseLeave={handleHeroMouseLeave}
         >
-          {/* Dynamic Background Orb */}
-          <motion.div
-            animate={{
-              scale: [1, 1.1, 1],
-              opacity: [0.15, 0.3, 0.15],
-            }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[60vw] max-w-[600px] h-[60vw] max-h-[600px] bg-white/10 rounded-full blur-[120px] pointer-events-none -z-10"
-          />
-          
-          {/* Floating Elements for Premium SaaS feel */}
-          <motion.div
-            animate={{ y: [0, -20, 0], rotate: [0, 10, 0] }}
-            transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
-            className="absolute top-1/4 left-1/4 w-32 h-32 bg-accent/20 rounded-full blur-3xl pointer-events-none -z-10"
-          />
-          <motion.div
-            animate={{ y: [0, 30, 0], rotate: [0, -15, 0] }}
-            transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            className="absolute bottom-1/4 right-1/4 w-40 h-40 bg-blue-500/10 rounded-full blur-3xl pointer-events-none -z-10"
-          />
+          {/* Spline 3D Embed as Background */}
+          <div className="absolute inset-0 w-[100vw] left-1/2 -translate-x-1/2 z-0 overflow-hidden pointer-events-auto">
+            <iframe 
+              src="https://my.spline.design/bentocardscopycopy-kpccyHyBzyplIs4Cz8WbLIZ3-CVV/" 
+              frameBorder="0" 
+              width="100%" 
+              height="100%" 
+              className="w-full h-full scale-100 origin-center"
+              title="Spline 3D Interactive Design"
+            ></iframe>
+            {/* Dark Overlay to ensure text readability */}
+            <div className="absolute inset-0 bg-background/20 backdrop-blur-[0.5px] z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-background/10 to-background z-10 pointer-events-none" />
+          </div>
 
-          <motion.div style={{ rotateX: heroRotateX, rotateY: heroRotateY, transformStyle: "preserve-3d" }} className="z-10">
+          <motion.div style={{ rotateX: heroRotateX, rotateY: heroRotateY, transformStyle: "preserve-3d" }} className="z-20 relative flex flex-col items-center mt-12">
             <FadeIn>
-              <div style={{ transform: "translateZ(20px)" }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface border border-border text-sm font-medium mb-8 shadow-sm">
+              <div style={{ transform: "translateZ(20px)" }} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-surface/80 border border-border text-sm font-medium mb-8 shadow-sm backdrop-blur-md">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
@@ -179,48 +313,32 @@ export default function App() {
                 <motion.h1 
                   animate={{ y: [0, -10, 0] }}
                   transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                  className="text-5xl md:text-7xl lg:text-[5.5rem] font-bold tracking-tighter mb-8 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 font-display drop-shadow-2xl leading-tight"
-                  style={{ textShadow: "0 10px 30px rgba(255,255,255,0.15), 0 1px 2px rgba(255,255,255,0.5)" }}
+                  className="text-5xl md:text-7xl lg:text-[6rem] font-bold tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-br from-white via-white/90 to-white/40 font-display drop-shadow-2xl leading-tight max-w-4xl mx-auto"
+                  style={{ textShadow: "0 10px 30px rgba(0,0,0,0.5), 0 1px 2px rgba(255,255,255,0.5)" }}
                 >
                   Tadiwanashe Brenda Chitsva
                 </motion.h1>
-              </div>
-            </FadeIn>
-            <FadeIn delay={0.2}>
-              <div style={{ transform: "translateZ(30px)" }}>
-                <p className="text-xl md:text-2xl text-muted max-w-2xl leading-relaxed mb-10 font-light">
-                  Information and Communication Engineer and Electronic Engineer. Specializing in embedded systems, autonomous AI agencies, and full-stack web development.
+                <p className="text-lg md:text-xl text-white/60 font-medium tracking-[0.2em] uppercase mb-8 max-w-2xl mx-auto">
+                  Embedded Systems · Information & Communication · Optical Systems · Autonomous AI Agents
                 </p>
               </div>
             </FadeIn>
-            <FadeIn delay={0.3}>
-              <div style={{ transform: "translateZ(40px)" }} className="flex flex-wrap items-center gap-4">
-                <a href="#projects" className="inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-white/90 transition-all hover:scale-105 active:scale-95 shadow-[0_0_20px_rgba(255,255,255,0.3)]">
+            <FadeIn delay={0.2}>
+              <div style={{ transform: "translateZ(40px)" }} className="flex flex-wrap items-center justify-center gap-4">
+                <a href="#projects" className="inline-flex items-center justify-center gap-2 bg-white text-black px-8 py-4 rounded-full font-bold hover:bg-white/90 transition-all hover:scale-105 active:scale-95 shadow-[0_0_30px_rgba(255,255,255,0.4)]">
                   View Projects <ArrowUpRight size={20} />
                 </a>
-                <a href="#about" className="inline-flex items-center justify-center gap-2 bg-surface border border-border px-8 py-4 rounded-full font-bold hover:bg-white/5 transition-all hover:scale-105 active:scale-95">
+                <a href="#about" className="inline-flex items-center justify-center gap-2 bg-surface/80 backdrop-blur-md border border-border px-8 py-4 rounded-full font-bold hover:bg-white/10 transition-all hover:scale-105 active:scale-95">
                   About Me
                 </a>
               </div>
             </FadeIn>
           </motion.div>
-
-          {/* Spline 3D Embed */}
-          <FadeIn delay={0.4} className="relative w-full h-[600px] lg:h-[900px] z-10 lg:scale-125 origin-center lg:translate-x-12">
-            <iframe 
-              src="https://my.spline.design/bentocardscopycopy-kpccyHyBzyplIs4Cz8WbLIZ3-CVV/" 
-              frameBorder="0" 
-              width="100%" 
-              height="100%" 
-              className="w-full h-full"
-              title="Spline 3D Interactive Design"
-            ></iframe>
-          </FadeIn>
         </motion.section>
 
         {/* Intro & Skills Bento */}
-        <section id="about" className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-          <FadeIn delay={0.3} className="md:col-span-2">
+        <section id="about" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <FadeIn delay={0.3} className="md:col-span-2 lg:col-span-2">
             <Card className="h-full flex flex-col justify-between group">
               <div className="mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8">
@@ -233,17 +351,21 @@ export default function App() {
                       <span className="text-accent font-medium tracking-wide uppercase text-sm">About Me</span>
                     </div>
                     <h2 className="text-3xl sm:text-4xl font-bold tracking-tight font-display">Engineering robust, secure, and autonomous systems.</h2>
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      <span className="px-3 py-1 bg-accent/10 text-accent border border-accent/20 rounded-full text-xs font-bold">MSc Information & Communication Engineering</span>
+                      <span className="px-3 py-1 bg-white/5 text-white/60 border border-white/10 rounded-full text-xs font-bold">NUIST, China</span>
+                    </div>
                   </div>
                 </div>
                 <div className="space-y-4 text-muted leading-relaxed text-lg">
-                  <p>
-                    I bring a rigorous, systems-level engineering approach to the tech industry. My <strong>First-Class B.Tech in Electronic Engineering (HIT)</strong> forged my expertise in low-level hardware, embedded systems, and strict <strong>systems auditing</strong>. My <strong>MSc in Information & Communication Engineering (NUIST)</strong> elevated this foundation into complex network architectures and advanced <strong>software engineering</strong>.
+                  <p className="text-xl text-accent font-light mb-6">
+                    Information and Communication Engineer & Electronic Engineer. Specializing in embedded systems, optical systems, nanotechnology, and autonomous AI agents.
                   </p>
                   <p>
-                    I don't just write code; I architect, audit, and secure end-to-end systems. By bridging physical infrastructure with intelligent software, I ensure that every platform is architecturally sound and secure by design.
+                    I bring a rigorous, systems-level engineering approach to complex technological challenges. My <strong>First-Class B.Tech in Electronic Engineering (HIT)</strong> forged my expertise in low-level hardware, embedded systems, and strict <strong>systems auditing</strong>. My <strong>MSc in Information & Communication Engineering (NUIST)</strong> from <strong>Nanjing University of Information Science and Technology in China</strong> elevated this foundation into complex network architectures, advanced <strong>software engineering</strong>, and cutting-edge <strong>nanotechnology</strong>.
                   </p>
                   <p>
-                    <strong>Industry Value:</strong> Before deploying any autonomous agency or enterprise platform, I leverage deep expertise in vulnerability assessment and code auditing to guarantee absolute reliability and performance. From full-stack web platforms to AI-run agencies (OpenClaw, Cursor, Claude), I deliver scalable, production-ready solutions that drive technological innovation.
+                    I don't just write code; I architect, audit, and secure end-to-end systems. By bridging physical infrastructure with intelligent software, I ensure that every platform—from <strong>optical sensing systems</strong> to <strong>autonomous AI agents</strong>—is architecturally sound and secure by design.
                   </p>
                 </div>
               </div>
@@ -258,14 +380,21 @@ export default function App() {
             </Card>
           </FadeIn>
 
-          <FadeIn delay={0.4} className="md:col-span-1">
+          <FadeIn delay={0.4} className="md:col-span-1 lg:col-span-1">
             <Card className="h-full flex flex-col">
               <h3 className="text-2xl font-bold tracking-tight mb-6 font-display">Technical Arsenal</h3>
               <div className="flex-1 flex flex-col gap-3">
                 <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
+                  <Sparkles className="text-muted shrink-0" />
+                  <div>
+                    <p className="font-medium text-sm">Optical Systems & Nanotechnology</p>
+                    <p className="text-xs text-muted">Nanoplasmonic sensing, refractive index sensing, COMSOL FDTD, biosensors</p>
+                  </div>
+                </div>
+                <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
                   <Terminal className="text-muted shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Agentic AI & Workflows</p>
+                    <p className="font-medium text-sm">Autonomous AI Agents</p>
                     <p className="text-xs text-muted">Manus, Antigravity, Cursor, Claude, Gemini, OpenClaw, Docker, n8n</p>
                   </div>
                 </div>
@@ -293,113 +422,205 @@ export default function App() {
                 <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
                   <Database className="text-muted shrink-0" />
                   <div>
-                    <p className="font-medium text-sm">Engineering Software & Modeling</p>
-                    <p className="text-xs text-muted">MATLAB, OpenCV, COMSOL FDTD, Proteus, Siemens (PLC), Origin</p>
-                  </div>
-                </div>
-                <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
-                  <BookOpen className="text-muted shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm">Research & Development</p>
-                    <p className="text-xs text-muted">Academic writing, data analysis, experimental design, scientific simulation</p>
-                  </div>
-                </div>
-                <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
-                  <Cpu className="text-muted shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm">Hardware Description & PCB</p>
-                    <p className="text-xs text-muted">VHDL, Verilog, Altium Designer</p>
-                  </div>
-                </div>
-                <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
-                  <Terminal className="text-muted shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm">Data Science & ML</p>
-                    <p className="text-xs text-muted">Python, PyTorch, TensorFlow, Pandas, Scikit-learn</p>
-                  </div>
-                </div>
-                <div className="bg-background/50 border border-border rounded-2xl p-3 flex items-center gap-4">
-                  <Code className="text-muted shrink-0" />
-                  <div>
-                    <p className="font-medium text-sm">Cloud, DevOps & IoT</p>
-                    <p className="text-xs text-muted">AWS, GCP, Docker, Kubernetes, CI/CD, MQTT, LoRaWAN</p>
+                    <p className="font-medium text-sm">Engineering Software</p>
+                    <p className="text-xs text-muted">MATLAB, OpenCV, COMSOL, Proteus, Siemens (PLC)</p>
                   </div>
                 </div>
               </div>
             </Card>
           </FadeIn>
+
+          <FadeIn delay={0.5} className="md:col-span-1 lg:col-span-1">
+            <Card className="h-full flex flex-col">
+              <h3 className="text-2xl font-bold tracking-tight mb-6 font-display">Linguistic Versatility</h3>
+              <div className="space-y-4 flex-1">
+                <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold">Shona</span>
+                    <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">Native</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "100%" }}
+                      transition={{ duration: 1, delay: 0.6 }}
+                      className="bg-accent h-full" 
+                    />
+                  </div>
+                </div>
+                <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold">English</span>
+                    <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">C1 (Expert)</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "95%" }}
+                      transition={{ duration: 1, delay: 0.7 }}
+                      className="bg-accent h-full" 
+                    />
+                  </div>
+                </div>
+                <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="font-bold">Chinese (Mandarin)</span>
+                    <span className="text-[10px] bg-accent/20 text-accent px-2 py-0.5 rounded-full font-bold uppercase tracking-wider">HSK 3 (Fluent)</span>
+                  </div>
+                  <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                    <motion.div 
+                      initial={{ width: 0 }}
+                      whileInView={{ width: "65%" }}
+                      transition={{ duration: 1, delay: 0.8 }}
+                      className="bg-accent h-full" 
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="mt-6 pt-6 border-t border-border">
+                <p className="text-xs text-muted italic flex items-center gap-2">
+                  <Globe size={14} className="text-accent" /> Bridge builder in global engineering teams.
+                </p>
+              </div>
+            </Card>
+          </FadeIn>
         </section>
 
-        {/* Awards & Certifications */}
+        {/* Recognition, Impact & Affiliations */}
         <section>
-          <div className="grid md:grid-cols-2 gap-6">
-            <FadeIn delay={0.1}>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Awards & Honors */}
+            <FadeIn delay={0.1} className="lg:col-span-2">
               <Card className="h-full">
                 <h3 className="text-3xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><Award className="text-accent"/> Awards & Honors</h3>
-                <ul className="space-y-6">
-                  <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
-                    <div>
-                      <h4 className="font-bold">Emerson Dambudzo Mnangagwa Chancellor's Award</h4>
-                      <p className="text-sm text-muted">Overall Best Graduating Female Student ($1000 prize). Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
-                    <div>
-                      <h4 className="font-bold">Vice Chancellor's Award</h4>
-                      <p className="text-sm text-muted">Best Graduating Female Student in Electronics Engineering. Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
-                    <div>
-                      <h4 className="font-bold">NUIST Excellent Freshman Scholarship</h4>
-                      <p className="text-sm text-muted">1st Class Scholarship based on merit. Awarded by Nanjing University of Information Science and Technology (NUIST) (2023–2025).</p>
-                    </div>
-                  </li>
-                  <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/zim.gov.zw" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
-                    <div>
-                      <h4 className="font-bold">STEM Scholarship Zimbabwe</h4>
-                      <p className="text-sm text-muted">Recognizing STEM academic promise. Awarded by the Government of Zimbabwe (2016-2018).</p>
-                    </div>
-                  </li>
-                </ul>
+                <div className="grid sm:grid-cols-2 gap-8">
+                  <ul className="space-y-6">
+                    <li className="flex gap-4">
+                      <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                      <div>
+                        <h4 className="font-bold">Emerson Dambudzo Mnangagwa Chancellor's Award</h4>
+                        <p className="text-sm text-muted">Overall Best Graduating Female Student ($1000 prize). Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
+                      </div>
+                    </li>
+                    <li className="flex gap-4">
+                      <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                      <div>
+                        <h4 className="font-bold">Vice Chancellor's Award</h4>
+                        <p className="text-sm text-muted">Best Graduating Female Student in Electronics Engineering. Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
+                      </div>
+                    </li>
+                  </ul>
+                  <ul className="space-y-6">
+                    <li className="flex gap-4">
+                      <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                      <div>
+                        <h4 className="font-bold">NUIST Excellent Freshman Scholarship</h4>
+                        <p className="text-sm text-muted">1st Class Scholarship based on merit. Awarded by Nanjing University of Information Science and Technology (NUIST) (2023–2025).</p>
+                      </div>
+                    </li>
+                    <li className="flex gap-4">
+                      <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/zim.gov.zw" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                      <div>
+                        <h4 className="font-bold">STEM Scholarship Zimbabwe</h4>
+                        <p className="text-sm text-muted">Recognizing STEM academic promise. Awarded by the Government of Zimbabwe (2016-2018).</p>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               </Card>
             </FadeIn>
 
-            <FadeIn delay={0.2}>
+            {/* Professional Affiliations */}
+            <FadeIn delay={0.2} className="lg:col-span-1">
               <Card className="h-full">
-                <h3 className="text-3xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><FileBadge className="text-accent"/> Certifications</h3>
+                <h3 className="text-2xl font-bold tracking-tight mb-6 flex items-center gap-3 font-display"><Globe className="text-accent"/> Affiliations</h3>
+                <div className="space-y-4">
+                  <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <SafeImage src="https://unavatar.io/duckduckgo/nspe.org" alt="NSPE Logo" className="w-8 h-8 rounded bg-white object-contain p-1" />
+                      <h4 className="font-bold text-sm">NSPE Member</h4>
+                    </div>
+                    <p className="text-xs text-muted">National Society of Professional Engineers. ID: 301173445</p>
+                  </div>
+                  <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <SafeImage src="https://unavatar.io/duckduckgo/ieee.org" alt="IEEE Logo" className="w-8 h-8 rounded bg-white object-contain p-1" />
+                      <h4 className="font-bold text-sm">IEEE Student Member</h4>
+                    </div>
+                    <p className="text-xs text-muted">Member ID: 101231198. Robotics & Automation Society.</p>
+                  </div>
+                  <div className="p-4 bg-background/50 border border-border rounded-2xl">
+                    <div className="flex items-center gap-3 mb-2">
+                      <SafeImage src="https://unavatar.io/duckduckgo/ewb.org.za" alt="EWBSA Logo" className="w-8 h-8 rounded bg-white object-contain p-1" />
+                      <h4 className="font-bold text-sm">EWBSA Member</h4>
+                    </div>
+                    <p className="text-xs text-muted">Engineers Without Borders South Africa.</p>
+                  </div>
+                </div>
+              </Card>
+            </FadeIn>
+
+            {/* Certifications */}
+            <FadeIn delay={0.3} className="lg:col-span-1">
+              <Card className="h-full">
+                <h3 className="text-2xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><FileBadge className="text-accent"/> Certifications</h3>
                 <ul className="space-y-4">
-                  <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <h4 className="font-bold text-lg text-foreground">AI Fluency: Framework & Foundations</h4>
-                      <a href="https://verify.skilljar.com/c/ri4ci9sngnzk" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
-                    </div>
-                    <p className="text-sm text-muted mb-4">Anthropic Education</p>
-                    <img loading="lazy" src="/anthropic-certificate.jpg" alt="Anthropic Certificate" className="w-full rounded-lg border border-border" />
+                  <li className="p-4 bg-background/50 border border-border rounded-xl">
+                    <h4 className="font-bold text-sm mb-1">AI Fluency: Frameworks</h4>
+                    <p className="text-xs text-muted">Anthropic Education</p>
                   </li>
-                  <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <h4 className="font-bold text-lg text-foreground">Quantum Computing Fundamentals</h4>
-                      <a href="https://www.credly.com/badges/46732ac5-922a-4d6f-8150-4d7f27ef4f16/print" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
-                    </div>
-                    <p className="text-sm text-muted mb-4">IBM SkillsBuild (Quantum Enigmas) & Udemy (Quantum NLP)</p>
-                    <img loading="lazy" src="/quantum-nlp-certificate.jpg" alt="Quantum Computing Certificate" className="w-full rounded-lg border border-border" />
+                  <li className="p-4 bg-background/50 border border-border rounded-xl">
+                    <h4 className="font-bold text-sm mb-1">Quantum Computing</h4>
+                    <p className="text-xs text-muted">IBM SkillsBuild & Udemy</p>
                   </li>
-                  <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
-                    <h4 className="font-bold text-lg text-foreground mb-1">PTE Academic English Assessment</h4>
-                    <p className="text-sm text-muted mb-4">Score: 90 (Elite academic English proficiency)</p>
-                    <img loading="lazy" src="/ppte-score-report.jpg" alt="PTE Score Report" className="w-full rounded-lg border border-border" />
-                  </li>
-                  <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
-                    <h4 className="font-bold text-lg text-foreground mb-1">150-Hour TEFL/TESOL Certificate</h4>
-                    <p className="text-sm text-muted mb-4">TEFL Universal</p>
-                    <img loading="lazy" src="/tefl-certificate.jpg" alt="TEFL Certificate" className="w-full rounded-lg border border-border" />
+                  <li className="p-4 bg-background/50 border border-border rounded-xl">
+                    <h4 className="font-bold text-sm mb-1">PTE Academic: 90/90</h4>
+                    <p className="text-xs text-muted">Elite English Proficiency</p>
                   </li>
                 </ul>
+                <div className="mt-6 pt-6 border-t border-border">
+                  <p className="text-xs text-muted italic">Full certification documents available in the Education section below.</p>
+                </div>
+              </Card>
+            </FadeIn>
+
+            {/* Leadership & Global Impact */}
+            <FadeIn delay={0.4} className="lg:col-span-2">
+              <Card className="h-full">
+                <h3 className="text-2xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><HeartHandshake className="text-accent"/> Leadership & Global Impact</h3>
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-white shrink-0 flex items-center justify-center p-1"><SafeImage src="https://ui-avatars.com/api/?name=FFA&background=0D8ABC&color=fff" alt="FFA" /></div>
+                      <div>
+                        <h4 className="font-bold text-sm">Online English Tutor</h4>
+                        <p className="text-xs text-accent mb-1">Free Fluency Academy · USA</p>
+                        <p className="text-xs text-muted">Implemented innovative learning technologies to boost student fluency globally.</p>
+                      </div>
+                    </div>
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-white shrink-0 flex items-center justify-center p-1"><SafeImage src="https://ui-avatars.com/api/?name=BHI&background=0D8ABC&color=fff" alt="BHI" /></div>
+                      <div>
+                        <h4 className="font-bold text-sm">Education Advisor</h4>
+                        <p className="text-xs text-accent mb-1">Brave Hearts International · Japan</p>
+                        <p className="text-xs text-muted">Mentored students through international applications and academic pathways.</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-4">
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-lg bg-white shrink-0 flex items-center justify-center p-1"><SafeImage src="https://ui-avatars.com/api/?name=MCC&background=0D8ABC&color=fff" alt="MCC" /></div>
+                      <div>
+                        <h4 className="font-bold text-sm">Communications Committee</h4>
+                        <p className="text-xs text-accent mb-1">Methodist Community Church · Zim</p>
+                        <p className="text-xs text-muted">Managed internal/external communications and community engagement strategies.</p>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-accent/5 border border-accent/20 rounded-2xl">
+                      <p className="text-xs font-medium text-accent italic">"Committed to leveraging technology for social good and educational empowerment across borders."</p>
+                    </div>
+                  </div>
+                </div>
               </Card>
             </FadeIn>
           </div>
@@ -576,13 +797,13 @@ export default function App() {
                 <div className="absolute top-0 right-0 w-64 h-64 bg-accent/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="flex items-center gap-3 mb-6">
                   <BookOpen className="text-accent" size={24} />
-                  <h3 className="text-3xl font-bold tracking-tight font-display">Peer-Reviewed Journal Publication</h3>
+                  <h3 className="text-3xl font-bold tracking-tight font-display">Springer Nature (plus) [Peer-Reviewed Journal] Plasmonics</h3>
                 </div>
                 <h4 className="text-xl font-bold mb-4 leading-snug">Tunable Square Annular Cavity Array (SACA) Nanoplasmonic Sensor for Refractive Index Sensing and Dynamic Optical Color Generation</h4>
                 
                 <div className="flex flex-wrap gap-3 mb-6">
                   <span className="px-4 py-1.5 bg-white/10 text-white border border-white/20 rounded-full text-sm font-bold tracking-wide">
-                    Springer Nature (Plasmonics)
+                    Springer Nature
                   </span>
                   <span className="px-4 py-1.5 bg-accent/20 text-accent border border-accent/30 rounded-full text-sm font-bold tracking-wide">
                     Published: 17 July 2025
@@ -596,7 +817,7 @@ export default function App() {
                   <strong>Contribution:</strong> Led the research, experimental design, and academic writing as the primary author. Designed and simulated nanoplasmonic sensing structures with enhanced spectral sensitivity for biosensing and optical detection applications. Conducted extensive scientific simulations and data analysis using <strong>COMSOL Multiphysics (FDTD)</strong>, <strong>MATLAB</strong>, and <strong>Origin</strong>.
                 </p>
                 
-                <a href="https://doi.org/10.1007/s11468-025-03167-1" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-accent text-white px-6 py-3 rounded-full text-sm font-bold hover:bg-accent/90 transition-colors shadow-[0_0_20px_rgba(var(--color-accent),0.3)]">
+                <a href="https://doi.org/10.1007/s11468-025-03167-1" target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-white text-black px-6 py-3 rounded-full text-sm font-bold hover:bg-white/90 transition-colors shadow-[0_0_20px_rgba(255,255,255,0.3)]">
                   Read Full Publication <ArrowUpRight size={18} />
                 </a>
               </Card>
@@ -606,222 +827,71 @@ export default function App() {
             <FadeIn delay={0.2} className="md:col-span-2">
               <Card>
                 <h3 className="text-3xl font-bold tracking-tight mb-10 flex items-center gap-3 font-display"><GraduationCap /> Academic Background</h3>
-                <div className="space-y-8 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-border before:to-transparent">
+                <div className="space-y-12">
                   
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
-                      <div className="w-3 h-3 bg-accent rounded-full"></div>
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-lg">Master of Science (MSc)</h4>
-                        <span className="text-xs font-mono text-accent">Aug 2025</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-2 mt-2">
+                  {/* Master's Degree */}
+                  <div className="relative group">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-full border border-border bg-surface flex items-center justify-center shrink-0">
                         <SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white" />
-                        <p className="text-sm font-medium text-foreground">Information and Communication Engineering</p>
                       </div>
-                      <p className="text-xs text-muted mb-3">Nanjing University of Information Science and Technology (NUIST). GPA: 3.93/5.0. Specialization in Nanophotonic Biosensors.</p>
-                      <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Digital Image Processing, Big Data Analyzing and Processing, Communication & Information Processing, Stochastic Processes, Matrix Theory.</p>
-                      <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                        <img loading="lazy" src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
-                        <img loading="lazy" src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
+                      <div>
+                        <h4 className="font-bold text-2xl">Master of Science (MSc)</h4>
+                        <p className="text-accent font-medium">Information and Communication Engineering · NUIST, China</p>
+                        <span className="text-xs font-mono text-muted">Aug 2025 · GPA: 3.93/5.0</span>
                       </div>
+                    </div>
+                    <p className="text-sm text-muted mb-6 max-w-3xl">Nanjing University of Information Science and Technology (NUIST). Specialization in Nanophotonic Biosensors. Key Coursework: Digital Image Processing, Big Data Analyzing and Processing, Stochastic Processes.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <img loading="lazy" src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
+                      <img loading="lazy" src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
                     </div>
                   </div>
 
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
-                      <div className="w-3 h-3 bg-muted rounded-full"></div>
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-lg">Bachelor of Technology</h4>
-                        <span className="text-xs font-mono text-muted">Oct 2023</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-2 mt-2">
+                  {/* Bachelor's Degree */}
+                  <div className="relative group pt-12 border-t border-border/50">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-full border border-border bg-surface flex items-center justify-center shrink-0">
                         <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
-                        <p className="text-sm font-medium text-foreground">Electronic Engineering (1st Class Honours)</p>
                       </div>
-                      <p className="text-xs text-muted mb-3">Harare Institute of Technology. Degree Class 1 (First Class).</p>
-                      <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Microcontrollers, DSP, Embedded Systems, Fundamentals of Photonics, Robotics Technology, RF Microwave Devices, Control Engineering.</p>
-                      <p className="text-xs text-accent mb-3"><strong>Awards:</strong> Chancellor's Award for Best Graduating Female Student, Vice Chancellor's Prize for Best Graduating Student in Electronic Engineering.</p>
-                      <img loading="lazy" src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <div>
+                        <h4 className="font-bold text-2xl">Bachelor of Technology</h4>
+                        <p className="text-accent font-medium">Electronic Engineering (1st Class Honours) · HIT</p>
+                        <span className="text-xs font-mono text-muted">Oct 2023 · Degree Class 1</span>
+                      </div>
+                    </div>
+                    <p className="text-sm text-muted mb-6 max-w-3xl">Harare Institute of Technology. Awards: Chancellor's Award for Best Graduating Female Student, Vice Chancellor's Prize.</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <img loading="lazy" src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
+                      <img loading="lazy" src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
                     </div>
                   </div>
 
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
-                      <div className="w-3 h-3 bg-muted rounded-full"></div>
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-lg">Higher & Tertiary Ed. Cert.</h4>
-                        <span className="text-xs font-mono text-muted">Oct 2023</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
-                        <p className="text-sm font-medium text-foreground">Harare Institute of Technology (Merit)</p>
-                      </div>
-                      <p className="text-xs text-muted mb-3">Formal academic certification completing tertiary foundation requirements, demonstrating pedagogical and foundational academic competence.</p>
-                      <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Applied Educational Technology, Research and Development Methodologies, Curriculum Issues in Higher and Tertiary Education.</p>
-                      <img loading="lazy" src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
-                    </div>
-                  </div>
-
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
-                      <div className="w-3 h-3 bg-muted rounded-full"></div>
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-lg">A Level (ZIMSEC)</h4>
-                        <span className="text-xs font-mono text-muted">Nov 2018</span>
-                      </div>
-                      <div className="flex items-center gap-3 mb-2 mt-2">
+                  {/* A & O Levels */}
+                  <div className="relative group pt-12 border-t border-border/50">
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="w-12 h-12 rounded-full border border-border bg-surface flex items-center justify-center shrink-0">
                         <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
-                        <p className="text-sm font-medium text-foreground">Physics (A), Chemistry (B), Pure Mathematics (B)</p>
                       </div>
-                      <p className="text-xs text-muted mb-3">ZRP High School.</p>
-                      <img loading="lazy" src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <div>
+                        <h4 className="font-bold text-2xl">Advanced & Ordinary Levels</h4>
+                        <p className="text-accent font-medium">ZIMSEC Certification</p>
+                        <span className="text-xs font-mono text-muted">2016 - 2018</span>
+                      </div>
                     </div>
-                  </div>
-
-                  <div className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                    <div className="flex items-center justify-center w-10 h-10 rounded-full border border-border bg-surface shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 shadow">
-                      <div className="w-3 h-3 bg-muted rounded-full"></div>
-                    </div>
-                    <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-2xl border border-border bg-background/50">
-                      <div className="flex items-center justify-between mb-1">
-                        <h4 className="font-bold text-lg">O Level (ZIMSEC)</h4>
-                        <span className="text-xs font-mono text-muted">Nov 2016</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted">A Level (Left)</p>
+                        <img loading="lazy" src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
                       </div>
-                      <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
-                        <p className="text-sm font-medium text-foreground">10 A's and 3 B's</p>
+                      <div className="space-y-2">
+                        <p className="text-xs font-bold uppercase tracking-wider text-muted">O Level (Right)</p>
+                        <img loading="lazy" src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full rounded-2xl border border-border hover:border-accent/50 transition-colors shadow-lg" />
                       </div>
-                      <p className="text-xs text-muted mb-3">Including Mathematics (A), Physics (A), Chemistry (A), Biology (B), Computer Studies (B).</p>
-                      <img loading="lazy" src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
                 </div>
-              </Card>
-            </FadeIn>
-          </div>
-        </section>
-
-        {/* Volunteer & Leadership */}
-        <section id="leadership">
-          <FadeIn>
-            <SectionHeading title="Leadership & Global Impact" icon={HeartHandshake} />
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-6">
-            <FadeIn delay={0.1}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <SafeImage src="https://ui-avatars.com/api/?name=Free+Fluency+Academy&background=0D8ABC&color=fff" alt="Free Fluency Academy Logo" className="w-12 h-12 rounded-lg bg-white" />
-                  <div>
-                    <h4 className="font-bold text-2xl mb-1 font-display">Online English Tutor</h4>
-                    <p className="text-accent text-sm font-medium">Free Fluency Academy · Ohio, USA</p>
-                    <span className="text-xs text-muted font-mono mt-1 block">Oct 2024 - 2025</span>
-                  </div>
-                </div>
-                <div className="space-y-3 text-sm text-muted mt-4">
-                  <p><strong className="text-foreground">Objective:</strong> Enhance English proficiency for international students.</p>
-                  <p><strong className="text-foreground">Action:</strong> Developed engaging marketing campaigns and implemented innovative learning technologies.</p>
-                  <p><strong className="text-foreground">Result:</strong> Improved language acquisition programs globally and boosted student fluency.</p>
-                </div>
-              </Card>
-            </FadeIn>
-            
-            <FadeIn delay={0.2}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <SafeImage src="https://ui-avatars.com/api/?name=Brave+Hearts+International&background=0D8ABC&color=fff" alt="Brave Hearts International Logo" className="w-12 h-12 rounded-lg bg-white" />
-                  <div>
-                    <h4 className="font-bold text-2xl mb-1 font-display">Education Advisor</h4>
-                    <p className="text-accent text-sm font-medium">Brave Hearts International · Japan</p>
-                    <span className="text-xs text-muted font-mono mt-1 block">2024 - 2025</span>
-                  </div>
-                </div>
-                <div className="space-y-3 text-sm text-muted mt-4">
-                  <p><strong className="text-foreground">Objective:</strong> Guide students in navigating international education opportunities.</p>
-                  <p><strong className="text-foreground">Action:</strong> Provided expert guidance on academic pathways and assisted in developing educational resources.</p>
-                  <p><strong className="text-foreground">Result:</strong> Improved access to quality education and successfully mentored students through applications.</p>
-                </div>
-              </Card>
-            </FadeIn>
-
-            <FadeIn delay={0.3}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <SafeImage src="https://ui-avatars.com/api/?name=Methodist+Community+Church&background=0D8ABC&color=fff" alt="Methodist Community Church Logo" className="w-12 h-12 rounded-lg bg-white" />
-                  <div>
-                    <h4 className="font-bold text-2xl mb-1 font-display">Communications Committee</h4>
-                    <p className="text-accent text-sm font-medium">Methodist Community Church · Zimbabwe</p>
-                    <span className="text-xs text-muted font-mono mt-1 block">2022 - 2025</span>
-                  </div>
-                </div>
-                <div className="space-y-3 text-sm text-muted mt-4">
-                  <p><strong className="text-foreground">Objective:</strong> Streamline organizational communication and outreach.</p>
-                  <p><strong className="text-foreground">Action:</strong> Managed internal/external communications and executed community engagement strategies.</p>
-                  <p><strong className="text-foreground">Result:</strong> Increased community engagement and ensured consistent information flow.</p>
-                </div>
-              </Card>
-            </FadeIn>
-          </div>
-        </section>
-
-        {/* Professional Affiliations */}
-        <section id="affiliations">
-          <FadeIn>
-            <SectionHeading title="Professional Affiliations" icon={Award} />
-          </FadeIn>
-          <div className="grid md:grid-cols-3 gap-6">
-            <FadeIn delay={0.1}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://unavatar.io/duckduckgo/nspe.org" alt="NSPE Logo" className="w-full h-full object-contain p-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg leading-tight">National Society of Professional Engineers (NSPE)</h4>
-                    <p className="text-accent text-sm font-medium mt-1">Member</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted font-mono">Member ID: 301173445</p>
-              </Card>
-            </FadeIn>
-
-            <FadeIn delay={0.2}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://unavatar.io/duckduckgo/ieee.org" alt="IEEE Logo" className="w-full h-full object-contain p-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg leading-tight">Institute of Electrical and Electronics Engineers (IEEE)</h4>
-                    <p className="text-accent text-sm font-medium mt-1">Student Member</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted font-mono mb-2">Member ID: 101231198</p>
-                <p className="text-sm text-muted">Participating in IEEE Robotics & Automation (RoboCup) and Pre-University STEM Communities.</p>
-              </Card>
-            </FadeIn>
-
-            <FadeIn delay={0.3}>
-              <Card className="h-full">
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://unavatar.io/duckduckgo/ewb.org.za" alt="EWBSA Logo" className="w-full h-full object-contain p-1" />
-                  </div>
-                  <div>
-                    <h4 className="font-bold text-lg leading-tight">Engineers Without Borders South Africa (EWBSA)</h4>
-                    <p className="text-accent text-sm font-medium mt-1">Student Member</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted">Supporting community-focused engineering and youth innovation in sustainability.</p>
               </Card>
             </FadeIn>
           </div>
@@ -839,6 +909,9 @@ export default function App() {
                   <div className="flex items-center justify-center gap-4">
                     <a href="https://wa.me/263779406846" target="_blank" rel="noreferrer" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="WhatsApp: +263 779 406 846">
                       <MessageCircle size={24} />
+                    </a>
+                    <a href="tel:+263779406846" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="Call: +263 779 406 846">
+                      <Phone size={24} />
                     </a>
                     <a href="https://linkedin.com/in/tadiwanashe-brenda-chitsva" target="_blank" rel="noreferrer" className="w-14 h-14 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all shadow-lg" title="LinkedIn">
                       <Linkedin size={24} />
