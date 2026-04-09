@@ -41,21 +41,37 @@ const SectionHeading = ({ title, icon: Icon }: { title: string, icon: any }) => 
 const SafeImage = ({ src, alt, className, fallbackText, ...props }: any) => {
   const [error, setError] = useState(false);
   
+  useEffect(() => {
+    setError(false);
+  }, [src]);
+
   if (error || !src) {
+    const initials = alt
+      ?.split(' ')
+      .filter(Boolean)
+      .map((n: string) => n[0])
+      .join('')
+      .substring(0, 2)
+      .toUpperCase() || '??';
+
     return (
       <div className={`${className} flex items-center justify-center bg-surface border border-border text-muted text-[10px] font-bold uppercase p-1 text-center overflow-hidden`}>
-        {fallbackText || alt?.split(' ').filter(Boolean).map((n: string) => n[0]).join('').substring(0, 2) || '??'}
+        {fallbackText || initials}
       </div>
     );
   }
 
+  const resolvedSrc = src?.startsWith('/') 
+    ? `${import.meta.env.BASE_URL.replace(/\/$/, '')}${src}`
+    : src;
+
   return (
     <img
-      src={src}
+      src={resolvedSrc}
       alt={alt}
       className={className}
-      referrerPolicy="no-referrer"
       onError={() => setError(true)}
+      loading="lazy"
       {...props}
     />
   );
@@ -313,28 +329,28 @@ export default function App() {
                 <h3 className="text-3xl font-bold tracking-tight mb-8 flex items-center gap-3 font-display"><Award className="text-accent"/> Awards & Honors</h3>
                 <ul className="space-y-6">
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">Emerson Dambudzo Mnangagwa Chancellor's Award</h4>
                       <p className="text-sm text-muted">Overall Best Graduating Female Student ($1000 prize). Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">Vice Chancellor's Award</h4>
                       <p className="text-sm text-muted">Best Graduating Female Student in Electronics Engineering. Awarded at Harare Institute of Technology, Zimbabwe (2023).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">NUIST Excellent Freshman Scholarship</h4>
                       <p className="text-sm text-muted">1st Class Scholarship based on merit. Awarded by Nanjing University of Information Science and Technology (NUIST) (2023–2025).</p>
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <div className="mt-1 shrink-0"><SafeImage src="https://ui-avatars.com/api/?name=ZIM&background=0D8ABC&color=fff" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
+                    <div className="mt-1 shrink-0"><SafeImage src="https://unavatar.io/duckduckgo/zim.gov.zw" alt="Zimbabwe Govt Logo" className="w-8 h-8 rounded bg-white object-contain p-0.5" /></div>
                     <div>
                       <h4 className="font-bold">STEM Scholarship Zimbabwe</h4>
                       <p className="text-sm text-muted">Recognizing STEM academic promise. Awarded by the Government of Zimbabwe (2016-2018).</p>
@@ -410,7 +426,7 @@ export default function App() {
               <FadeIn delay={0.2}>
                 <Card className="h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
+                    <SafeImage src="https://unavatar.io/duckduckgo/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
                       <h3 className="text-2xl font-bold tracking-tight font-display">IT Support Intern</h3>
                       <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
@@ -427,7 +443,7 @@ export default function App() {
               <FadeIn delay={0.3}>
                 <Card className="h-full">
                   <div className="flex items-center gap-4 mb-4">
-                    <SafeImage src="https://logo.clearbit.com/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
+                    <SafeImage src="https://unavatar.io/duckduckgo/zimswitch.co.zw" alt="Zimswitch Logo" className="w-12 h-12 rounded-lg bg-white" />
                     <div>
                       <h3 className="text-2xl font-bold tracking-tight font-display">Customer Service Agent</h3>
                       <p className="text-accent">Zimswitch Technologies Pvt Ltd · Zimbabwe</p>
@@ -593,7 +609,7 @@ export default function App() {
                         <span className="text-xs font-mono text-accent">Aug 2025</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://unavatar.io/duckduckgo/nuist.edu.cn" alt="NUIST Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Information and Communication Engineering</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Nanjing University of Information Science and Technology (NUIST). GPA: 3.93/5.0. Specialization in Nanophotonic Biosensors.</p>
@@ -615,7 +631,7 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Oct 2023</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://unavatar.io/duckduckgo/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Electronic Engineering (1st Class Honours)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Harare Institute of Technology. Degree Class 1 (First Class).</p>
@@ -635,7 +651,7 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Oct 2023</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://unavatar.io/duckduckgo/hit.ac.zw" alt="HIT Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Harare Institute of Technology (Merit)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Formal academic certification completing tertiary foundation requirements, demonstrating pedagogical and foundational academic competence.</p>
@@ -654,7 +670,7 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Nov 2018</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://unavatar.io/duckduckgo/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">Physics (A), Chemistry (B), Pure Mathematics (B)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">ZRP High School.</p>
@@ -672,7 +688,7 @@ export default function App() {
                         <span className="text-xs font-mono text-muted">Nov 2016</span>
                       </div>
                       <div className="flex items-center gap-3 mb-2 mt-2">
-                        <SafeImage src="https://logo.clearbit.com/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
+                        <SafeImage src="https://unavatar.io/duckduckgo/zimsec.co.zw" alt="ZIMSEC Logo" className="w-8 h-8 rounded bg-white" />
                         <p className="text-sm font-medium text-foreground">10 A's and 3 B's</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Including Mathematics (A), Physics (A), Chemistry (A), Biology (B), Computer Studies (B).</p>
@@ -758,7 +774,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://logo.clearbit.com/nspe.org" alt="NSPE Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://unavatar.io/duckduckgo/nspe.org" alt="NSPE Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">National Society of Professional Engineers (NSPE)</h4>
@@ -773,7 +789,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://logo.clearbit.com/ieee.org" alt="IEEE Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://unavatar.io/duckduckgo/ieee.org" alt="IEEE Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">Institute of Electrical and Electronics Engineers (IEEE)</h4>
@@ -789,7 +805,7 @@ export default function App() {
               <Card className="h-full">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shrink-0 overflow-hidden">
-                    <SafeImage src="https://logo.clearbit.com/ewb.org.za" alt="EWBSA Logo" className="w-full h-full object-contain p-1" />
+                    <SafeImage src="https://unavatar.io/duckduckgo/ewb.org.za" alt="EWBSA Logo" className="w-full h-full object-contain p-1" />
                   </div>
                   <div>
                     <h4 className="font-bold text-lg leading-tight">Engineers Without Borders South Africa (EWBSA)</h4>
