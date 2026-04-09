@@ -61,22 +61,26 @@ const SafeImage = ({ src, alt, className, fallbackText, ...props }: any) => {
     );
   }
 
-  // Use weserv.nl as a proxy for external images to bypass DNS/SSL issues
-  // Use absolute paths for local images
-  const isExternal = src.startsWith('http');
-  const resolvedSrc = isExternal
-    ? `https://images.weserv.nl/?url=${encodeURIComponent(src)}&default=${encodeURIComponent(src)}`
-    : src;
+  let resolvedSrc = src;
+  
+  if (src.startsWith('http')) {
+    // For external logos, use Google Favicon service as primary fallback for Clearbit
+    if (src.includes('logo.clearbit.com')) {
+      const domain = src.split('/').pop();
+      resolvedSrc = `https://www.google.com/s2/favicons?domain=${domain}&sz=128`;
+    }
+  } else {
+    // For local images, ensure they start with /
+    resolvedSrc = src.startsWith('/') ? src : `/${src}`;
+  }
 
   return (
     <img
-      key={resolvedSrc}
       src={resolvedSrc}
       alt={alt}
       className={className}
       onError={() => setError(true)}
       loading="lazy"
-      crossOrigin="anonymous"
       {...props}
     />
   );
