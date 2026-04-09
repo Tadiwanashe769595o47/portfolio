@@ -225,7 +225,7 @@ export default function App() {
               <div className="mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-border shrink-0 shadow-xl">
-                    <SafeImage src="/profile.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" />
+                    <img loading="lazy" src="/profile.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -379,7 +379,7 @@ export default function App() {
                       <a href="https://verify.skilljar.com/c/ri4ci9sngnzk" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
                     </div>
                     <p className="text-sm text-muted mb-4">Anthropic Education</p>
-                    <SafeImage src="/anthropic-certificate.jpg" alt="Anthropic Certificate" className="w-full rounded-lg border border-border" />
+                    <img loading="lazy" src="/anthropic-certificate.jpg" alt="Anthropic Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <div className="flex justify-between items-start gap-2 mb-1">
@@ -387,17 +387,17 @@ export default function App() {
                       <a href="https://www.credly.com/badges/46732ac5-922a-4d6f-8150-4d7f27ef4f16/print" target="_blank" rel="noreferrer" className="text-xs font-medium bg-accent/20 text-accent px-2 py-1 rounded hover:bg-accent/30 transition-colors shrink-0">Verify</a>
                     </div>
                     <p className="text-sm text-muted mb-4">IBM SkillsBuild (Quantum Enigmas) & Udemy (Quantum NLP)</p>
-                    <SafeImage src="/quantum-nlp-certificate.jpg" alt="Quantum Computing Certificate" className="w-full rounded-lg border border-border" />
+                    <img loading="lazy" src="/quantum-nlp-certificate.jpg" alt="Quantum Computing Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <h4 className="font-bold text-lg text-foreground mb-1">PTE Academic English Assessment</h4>
                     <p className="text-sm text-muted mb-4">Score: 90 (Elite academic English proficiency)</p>
-                    <SafeImage src="/ppte-score-report.jpg" alt="PTE Score Report" className="w-full rounded-lg border border-border" />
+                    <img loading="lazy" src="/ppte-score-report.jpg" alt="PTE Score Report" className="w-full rounded-lg border border-border" />
                   </li>
                   <li className="p-5 bg-background/50 border border-border rounded-xl hover:border-accent/50 transition-colors">
                     <h4 className="font-bold text-lg text-foreground mb-1">150-Hour TEFL/TESOL Certificate</h4>
                     <p className="text-sm text-muted mb-4">TEFL Universal</p>
-                    <SafeImage src="/tefl-certificate.jpg" alt="TEFL Certificate" className="w-full rounded-lg border border-border" />
+                    <img loading="lazy" src="/tefl-certificate.jpg" alt="TEFL Certificate" className="w-full rounded-lg border border-border" />
                   </li>
                 </ul>
               </Card>
@@ -479,7 +479,7 @@ export default function App() {
             <FadeIn delay={0.1}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <SafeImage src="/anyiculture-screenshot.jpg" alt="Anyiculture" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img loading="lazy" src="/anyiculture-screenshot.jpg" alt="Anyiculture" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -501,7 +501,7 @@ export default function App() {
             <FadeIn delay={0.2}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <SafeImage src="/lycore-screenshot.jpg" alt="Lycore" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img loading="lazy" src="/lycore-screenshot.jpg" alt="Lycore" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -523,7 +523,7 @@ export default function App() {
             <FadeIn delay={0.3}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <SafeImage src="/igcse-screenshot.jpg" alt="IGCSE Study App" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img loading="lazy" src="/igcse-screenshot.jpg" alt="IGCSE Study App" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Solo AI Developer</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -545,7 +545,7 @@ export default function App() {
             <FadeIn delay={0.4}>
               <Card className="group h-full flex flex-col">
                 <div className="w-full h-48 bg-surface-hover rounded-xl mb-6 overflow-hidden relative border border-border">
-                  <SafeImage src="/lotanash-screenshot.jpg" alt="Self-Service Fuel Purchase System" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
+                  <img loading="lazy" src="/lotanash-screenshot.jpg" alt="Self-Service Fuel Purchase System" className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="absolute top-3 right-3 bg-black/80 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-green-400 border border-green-500/30">Embedded System</div>
                 </div>
                 <div className="flex gap-2 mb-4">
@@ -624,8 +624,8 @@ export default function App() {
                       <p className="text-xs text-muted mb-3">Nanjing University of Information Science and Technology (NUIST). GPA: 3.93/5.0. Specialization in Nanophotonic Biosensors.</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Digital Image Processing, Big Data Analyzing and Processing, Communication & Information Processing, Stochastic Processes, Matrix Theory.</p>
                       <div className="flex flex-col sm:flex-row gap-2 mt-2">
-                        <SafeImage src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
-                        <SafeImage src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
+                        <img loading="lazy" src="/msc-certificate1.jpg" alt="MSc Certificate 1" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
+                        <img loading="lazy" src="/msc-certificate2.jpg" alt="MSc Certificate 2" className="w-full sm:w-1/2 max-w-sm rounded-lg border border-border" />
                       </div>
                     </div>
                   </div>
@@ -646,7 +646,7 @@ export default function App() {
                       <p className="text-xs text-muted mb-3">Harare Institute of Technology. Degree Class 1 (First Class).</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Microcontrollers, DSP, Embedded Systems, Fundamentals of Photonics, Robotics Technology, RF Microwave Devices, Control Engineering.</p>
                       <p className="text-xs text-accent mb-3"><strong>Awards:</strong> Chancellor's Award for Best Graduating Female Student, Vice Chancellor's Prize for Best Graduating Student in Electronic Engineering.</p>
-                      <SafeImage src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <img loading="lazy" src="/btech-certificate.jpg" alt="BTech Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -665,7 +665,7 @@ export default function App() {
                       </div>
                       <p className="text-xs text-muted mb-3">Formal academic certification completing tertiary foundation requirements, demonstrating pedagogical and foundational academic competence.</p>
                       <p className="text-xs text-foreground/80 mb-3"><strong>Key Coursework:</strong> Applied Educational Technology, Research and Development Methodologies, Curriculum Issues in Higher and Tertiary Education.</p>
-                      <SafeImage src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <img loading="lazy" src="/tertiary-ed-certificate.jpg" alt="Tertiary Education Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -683,7 +683,7 @@ export default function App() {
                         <p className="text-sm font-medium text-foreground">Physics (A), Chemistry (B), Pure Mathematics (B)</p>
                       </div>
                       <p className="text-xs text-muted mb-3">ZRP High School.</p>
-                      <SafeImage src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <img loading="lazy" src="/a-level-certificate.jpg" alt="A Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 
@@ -701,7 +701,7 @@ export default function App() {
                         <p className="text-sm font-medium text-foreground">10 A's and 3 B's</p>
                       </div>
                       <p className="text-xs text-muted mb-3">Including Mathematics (A), Physics (A), Chemistry (A), Biology (B), Computer Studies (B).</p>
-                      <SafeImage src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
+                      <img loading="lazy" src="/o-level-certificate.jpg" alt="O Level Certificate" className="w-full max-w-sm rounded-lg border border-border mt-2" />
                     </div>
                   </div>
 

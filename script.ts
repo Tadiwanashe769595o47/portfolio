@@ -1,14 +1,11 @@
-import https from 'https';
+import fs from 'fs';
+import path from 'path';
 
-const req = https.get('https://portfolio-xi-ten-92.vercel.app/anthropic-certificate.jpg', (res) => {
-  console.log('Status Code:', res.statusCode);
-  console.log('Headers:', res.headers);
-});
+const appTsxPath = path.join(process.cwd(), 'src', 'App.tsx');
+let content = fs.readFileSync(appTsxPath, 'utf-8');
 
-req.on('error', (e) => {
-  console.error('Error:', e);
-});
+// Replace <SafeImage src="/..." ... /> with <img src="/..." ... />
+content = content.replace(/<SafeImage src="\//g, '<img loading="lazy" src="/');
 
-req.setTimeout(5000, () => {
-  req.destroy();
-});
+fs.writeFileSync(appTsxPath, content);
+console.log('Replaced local SafeImage usages with img tags.');
