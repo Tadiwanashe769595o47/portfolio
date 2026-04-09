@@ -1,5 +1,7 @@
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, useScroll, useTransform, useMotionValue, useSpring } from 'motion/react';
-import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake } from 'lucide-react';
+import { ArrowUpRight, Github, Linkedin, Mail, Cpu, Code, Terminal, Database, Sparkles, FileText, Award, BookOpen, Globe, Briefcase, GraduationCap, AppWindow, FileBadge, Server, MessageCircle, HeartHandshake, Send, Bot, Loader2 } from 'lucide-react';
+import { GoogleGenAI } from '@google/genai';
 
 const FadeIn = ({ children, delay = 0, className = "" }: { children: React.ReactNode, delay?: number, className?: string }) => (
   <motion.div
@@ -36,6 +38,144 @@ const SectionHeading = ({ title, icon: Icon }: { title: string, icon: any }) => 
     <h2 className="text-4xl font-bold tracking-tight font-display">{title}</h2>
   </div>
 );
+
+const PortfolioChatbot = () => {
+  const [messages, setMessages] = useState<{ role: 'user' | 'model', content: string }[]>([
+    { role: 'model', content: "Hi! I'm an AI assistant trained on Tadiwanashe's portfolio. Ask me anything about her skills, experience, or projects!" }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSend = async () => {
+    if (!input.trim()) return;
+
+    const userMsg = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMsg }]);
+    setIsLoading(true);
+
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
+      
+      const systemInstruction = `You are an AI assistant representing Tadiwanashe Brenda Chitsva. 
+You answer questions about her skills, experience, and projects based on her portfolio.
+Be professional, concise, and helpful.
+
+Here is her information:
+- Name: Tadiwanashe Brenda Chitsva
+- Roles: Information and Communication Engineer, Electronic Engineer, Full-stack web developer, AI systems engineer.
+- Location: Nanjing, China & Zimbabwe. Open to Global Roles.
+- Education: 
+  - MSc in Information & Communication Engineering (NUIST, China)
+  - B.Tech in Electronic Engineering (First Class, HIT, Zimbabwe)
+- Experience:
+  - IT Support Intern & Customer Service Agent at Zimswitch Technologies (Jan 2022 - Jan 2023). Improved processing efficiency by 3% via AI/ML deployments.
+  - English Teacher (Free Fluency Academy, Brave Hearts International, Methodist Community Church).
+- Projects:
+  - Anyiculture: Full-stack agricultural e-commerce platform (React, Node.js, MongoDB, Tailwind, Stripe).
+  - Lycore: AI-powered medical diagnosis platform (React, Python, TensorFlow, FastAPI, PostgreSQL).
+  - IGCSE Study App: Educational platform (React Native, Firebase, Node.js).
+  - Lotanash: Self-Service Fuel Purchase System (Embedded C, C++, IoT, React).
+- Skills:
+  - Languages: Python, JavaScript/TypeScript, C/C++, SQL, HTML/CSS.
+  - Frameworks: React, Node.js, Express, Tailwind CSS, FastAPI.
+  - AI/ML: TensorFlow, PyTorch, LLMs, Computer Vision, NLP.
+  - Hardware: Microcontrollers (Arduino, ESP32, STM32), PCB Design, IoT.
+  - Tools: Git, Docker, Linux, AWS, Firebase.
+- Contact: WhatsApp (+263 779 406 846), LinkedIn (tadiwanashe-brenda-chitsva), Email (chitsvatadiwanashe@gmail.com).
+
+Do not invent information. If asked something outside this scope, politely say you don't have that information but they can contact her directly.`;
+
+      const history = messages.slice(1).map(m => ({
+        role: m.role,
+        parts: [{ text: m.content }]
+      }));
+
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: [
+          ...history,
+          { role: 'user', parts: [{ text: userMsg }] }
+        ],
+        config: {
+          systemInstruction: systemInstruction,
+        }
+      });
+
+      setMessages(prev => [...prev, { role: 'model', content: response.text || "I'm sorry, I couldn't generate a response." }]);
+    } catch (error) {
+      console.error("Chatbot error:", error);
+      setMessages(prev => [...prev, { role: 'model', content: "Sorry, I encountered an error. Please try again later or contact Tadiwanashe directly." }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Card className="flex flex-col h-[500px] w-full mt-12 bg-surface/50 border-border">
+      <div className="p-4 border-b border-border flex items-center gap-3 bg-surface/30">
+        <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center text-accent">
+          <Bot size={24} />
+        </div>
+        <div>
+          <h3 className="font-bold font-display">Tadiwanashe's AI Assistant</h3>
+          <p className="text-xs text-muted">Ask me about her skills & experience</p>
+        </div>
+      </div>
+      
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 relative">
+        {isLoading && (
+          <div className="sticky top-0 left-0 right-0 z-10 flex justify-center mb-4">
+            <div className="bg-surface/90 backdrop-blur-md border border-border rounded-full px-4 py-2 flex items-center gap-2 shadow-lg">
+              <Loader2 size={16} className="animate-spin text-accent" />
+              <span className="text-sm font-medium text-foreground">AI is thinking...</span>
+            </div>
+          </div>
+        )}
+        {messages.map((msg, idx) => (
+          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[80%] rounded-2xl p-3 ${msg.role === 'user' ? 'bg-white text-black rounded-tr-sm' : 'bg-surface border border-border text-foreground rounded-tl-sm'}`}>
+              <p className="text-sm whitespace-pre-wrap">{msg.content}</p>
+            </div>
+          </div>
+        ))}
+        <div ref={messagesEndRef} />
+      </div>
+      
+      <div className="p-4 border-t border-border bg-surface/30">
+        <form 
+          onSubmit={(e) => { e.preventDefault(); handleSend(); }}
+          className="flex gap-2"
+        >
+          <input
+            type="text"
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask about my React experience..."
+            className="flex-1 bg-background border border-border rounded-full px-4 py-2 text-sm focus:outline-none focus:border-accent transition-colors"
+            disabled={isLoading}
+          />
+          <button 
+            type="submit"
+            disabled={isLoading || !input.trim()}
+            className="w-10 h-10 rounded-full bg-white text-black flex items-center justify-center hover:bg-white/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            <Send size={18} className="ml-1" />
+          </button>
+        </form>
+      </div>
+    </Card>
+  );
+};
 
 export default function App() {
   const { scrollY } = useScroll();
@@ -156,7 +296,7 @@ export default function App() {
           </motion.div>
 
           {/* Spline 3D Embed */}
-          <FadeIn delay={0.4} className="relative w-full h-[600px] lg:h-[850px] z-10 lg:scale-110 origin-center lg:translate-x-8">
+          <FadeIn delay={0.4} className="relative w-full h-[600px] lg:h-[900px] z-10 lg:scale-125 origin-center lg:translate-x-12">
             <iframe 
               src="https://my.spline.design/bentocardscopycopy-kpccyHyBzyplIs4Cz8WbLIZ3-CVV/" 
               frameBorder="0" 
@@ -175,7 +315,7 @@ export default function App() {
               <div className="mb-8">
                 <div className="flex flex-col sm:flex-row sm:items-center gap-6 mb-8">
                   <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full overflow-hidden border-4 border-border shrink-0 shadow-xl">
-                    <img src="/Weixin%20Image_20250926111955_110_543.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Tadiwanashe+Chitsva&background=0D8ABC&color=fff'; }} />
+                    <img src="/profile.jpg" alt="Tadiwanashe Brenda Chitsva" className="w-full h-full object-cover bg-surface-hover" onError={(e) => { e.currentTarget.src = 'https://ui-avatars.com/api/?name=Tadiwanashe+Chitsva&background=0D8ABC&color=fff'; }} />
                   </div>
                   <div>
                     <div className="flex items-center gap-2 mb-2">
@@ -780,23 +920,30 @@ export default function App() {
         {/* Socials & Contact */}
         <section id="contact">
           <FadeIn delay={0.1}>
-            <Card className="flex flex-col md:flex-row items-center justify-between gap-8 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.05),_transparent_50%)]">
-              <div>
-                <h2 className="text-4xl font-bold tracking-tight mb-4 font-display">Let's build together.</h2>
-                <p className="text-muted max-w-md">Currently open for new opportunities in Agentic AI, Web Development, Embedded Systems, and Research.</p>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+              <Card className="flex flex-col items-start justify-between gap-8 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.05),_transparent_50%)] h-full">
+                <div>
+                  <h2 className="text-4xl font-bold tracking-tight mb-4 font-display">Let's build together.</h2>
+                  <p className="text-muted max-w-md mb-8">Currently open for new opportunities in Agentic AI, Web Development, Embedded Systems, and Research.</p>
+                  
+                  <div className="flex items-center gap-3">
+                    <a href="https://wa.me/263779406846" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="WhatsApp: +263 779 406 846">
+                      <MessageCircle size={20} />
+                    </a>
+                    <a href="https://linkedin.com/in/tadiwanashe-brenda-chitsva" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="LinkedIn">
+                      <Linkedin size={20} />
+                    </a>
+                    <a href="mailto:chitsvatadiwanashe@gmail.com" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Email: chitsvatadiwanashe@gmail.com">
+                      <Mail size={20} />
+                    </a>
+                  </div>
+                </div>
+              </Card>
+              
+              <div className="h-full">
+                <PortfolioChatbot />
               </div>
-              <div className="flex items-center gap-3">
-                <a href="https://wa.me/263779406846" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="WhatsApp: +263 779 406 846">
-                  <MessageCircle size={20} />
-                </a>
-                <a href="https://linkedin.com/in/tadiwanashe-brenda-chitsva" target="_blank" rel="noreferrer" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="LinkedIn">
-                  <Linkedin size={20} />
-                </a>
-                <a href="mailto:chitsvatadiwanashe@gmail.com" className="w-12 h-12 rounded-full bg-background border border-border flex items-center justify-center hover:bg-white hover:text-black transition-all" title="Email: chitsvatadiwanashe@gmail.com">
-                  <Mail size={20} />
-                </a>
-              </div>
-            </Card>
+            </div>
           </FadeIn>
         </section>
 
